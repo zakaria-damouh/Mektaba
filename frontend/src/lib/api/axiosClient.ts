@@ -1,9 +1,10 @@
 import axios from "axios";
 
 export const axiosClient = axios.create({
-  baseURL: process.env.NEXT_PUBLIC_API_URL || "http://localhost:3000",
+  baseURL: process.env.NEXT_PUBLIC_API_URL || "http://localhost:8000/api",
   withCredentials: true,
 });
+
 
 axiosClient.interceptors.request.use((config) => {
   const token = localStorage.getItem("token");

@@ -1,65 +1,154 @@
-import { StockItem } from "@/data/mektaba-stock";
-import { CAT_ACCENT, CAT_GRADIENTS, CAT_ICON, formatMAD, STATUS_MAP, stockStatus } from "@/helpers/productHelper";
+"use client";
 
-function ProductRow({
-  item,
-  onClick,
-}: {
-  item: StockItem;
-  onClick: () => void;
-}) {
-  const status = stockStatus(item);
-  const st = STATUS_MAP[status];
-  const accent = CAT_ACCENT[item.category];
+import {
+  Table,
+  TableBody,
+  TableCell,
+  TableHead,
+  TableHeader,
+  TableRow,
+} from "@/components/ui/table";
 
+import { Badge } from "@/components/ui/badge";
+import { formatDate } from "@/helpers/date";
+import { Product } from "@/types/productsType";
+
+export default function ProductRow({ products }: { products: Product[] }) {
   return (
-    <button
-      onClick={onClick}
-      className="group flex w-full items-center gap-4 rounded-xl border border-zinc-100 bg-white px-5 py-3.5 text-left shadow-sm transition-all duration-150 hover:border-zinc-200 hover:shadow-md focus:outline-none focus-visible:ring-2 focus-visible:ring-zinc-400"
-    >
-      {/* Icon */}
-      <div
-        className={`flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-gradient-to-br ${CAT_GRADIENTS[item.category]} text-xl`}
-      >
-        {CAT_ICON[item.category]}
+    <div className="rounded-xl border bg-background shadow-sm overflow-hidden">
+
+      {/* DESKTOP TABLE */}
+      <div className="hidden md:block">
+        <Table>
+          <TableHeader>
+            <TableRow className="hover:bg-transparent border-b">
+              <TableHead>Produit</TableHead>
+              <TableHead>Référence</TableHead>
+              <TableHead>Catégorie</TableHead>
+              <TableHead className="text-right">Prix</TableHead>
+              <TableHead className="text-right">Stock</TableHead>
+              <TableHead className="text-right">Dernier réappro</TableHead>
+            </TableRow>
+          </TableHeader>
+
+          <TableBody>
+            {products?.map((product) => {
+              const isLowStock = product?.stock <= product?.minStock;
+
+              return (
+                <TableRow
+                  key={product?.id}
+                  className="hover:bg-muted/40 transition"
+                >
+                  <TableCell>
+                    <div className="flex items-center gap-3">
+                      <div className="h-10 w-10 rounded-md bg-muted border flex items-center justify-center">
+                        <span className="text-[10px] text-muted-foreground">
+                          IMG
+                        </span>
+                      </div>
+
+                      <div className="flex flex-col">
+                        <span className="font-medium">{product?.name}</span>
+                        <span className="text-xs text-muted-foreground">
+                          {product?.nameAr}
+                        </span>
+                      </div>
+                    </div>
+                  </TableCell>
+
+                  <TableCell className="text-muted-foreground text-sm">
+                    {product?.ref}
+                  </TableCell>
+
+                  <TableCell>
+                    <Badge variant="outline" className="text-xs">
+                      {product?.categories?.[0]?.category?.name}
+                    </Badge>
+                  </TableCell>
+
+                  <TableCell className="text-right font-medium">
+                    {product?.price} MAD
+                  </TableCell>
+
+                  <TableCell className="text-right">
+                    <span
+                      className={
+                        isLowStock
+                          ? "text-red-500 font-semibold"
+                          : "text-foreground"
+                      }
+                    >
+                      {product?.stock}
+                    </span>
+                  </TableCell>
+
+                  <TableCell className="text-right text-muted-foreground text-sm">
+                    {formatDate(product?.lastRestocked)}
+                  </TableCell>
+                </TableRow>
+              );
+            })}
+          </TableBody>
+        </Table>
       </div>
 
-      {/* Name */}
-      <div className="min-w-0 flex-1">
-        <p className="truncate text-sm font-semibold text-zinc-800">{item.name}</p>
-        <p className="text-[10px] font-mono text-zinc-400">{item.id} · {item.category}</p>
+      {/* MOBILE CARDS */}
+      <div className="md:hidden divide-y">
+        {products?.map((product) => {
+          const isLowStock = product?.stock <= product?.minStock;
+
+          return (
+            <div key={product?.id} className="p-3 space-y-2">
+
+              <div className="flex items-start justify-between gap-2">
+                <div className="flex gap-2 items-center">
+                  <div className="h-9 w-9 rounded-md bg-muted border flex items-center justify-center">
+                    <span className="text-[9px] text-muted-foreground">
+                      IMG
+                    </span>
+                  </div>
+
+                  <div>
+                    <p className="text-sm font-medium">{product?.name}</p>
+                    <p className="text-xs text-muted-foreground">
+                      {product?.nameAr}
+                    </p>
+                  </div>
+                </div>
+
+                <Badge
+                  variant={isLowStock ? "destructive" : "secondary"}
+                  className="text-[10px]"
+                >
+                  {isLowStock ? "Faible" : "OK"}
+                </Badge>
+              </div>
+
+              <div className="grid grid-cols-2 text-xs gap-y-1">
+                <span className="text-muted-foreground">Réf</span>
+                <span>{product?.ref}</span>
+
+                <span className="text-muted-foreground">Prix</span>
+                <span className="font-medium">{product?.price} MAD</span>
+
+                <span className="text-muted-foreground">Stock</span>
+                <span className={isLowStock ? "text-red-500 font-semibold" : ""}>
+                  {product?.stock}
+                </span>
+
+                <span className="text-muted-foreground">Catégorie</span>
+                <span>{product?.categories?.[0]?.category?.name}</span>
+
+                <span className="text-muted-foreground">Date</span>
+                <span className="text-muted-foreground">
+                  {formatDate(product?.lastRestocked)}
+                </span>
+              </div>
+            </div>
+          );
+        })}
       </div>
-
-      {/* Stock bar */}
-      <div className="hidden w-28 sm:block">
-        <div className="flex justify-between text-[10px] text-zinc-400 mb-1">
-          <span>{item.stock}</span>
-          <span>min {item.minStock}</span>
-        </div>
-        <div className="h-1.5 w-full overflow-hidden rounded-full bg-zinc-100">
-          <div
-            className={`h-full rounded-full ${accent}`}
-            style={{
-              width: `${Math.min(100, Math.round((item.stock / (item.minStock * 5)) * 100))}%`,
-            }}
-          />
-        </div>
-      </div>
-
-      {/* Price */}
-      <span className="hidden w-24 shrink-0 text-right text-sm font-bold text-zinc-900 sm:block">
-        {formatMAD(item.price)}
-      </span>
-
-      {/* Status */}
-      <span
-        className={`flex shrink-0 items-center gap-1 rounded-full px-2.5 py-1 text-[11px] font-medium ${st.pill}`}
-      >
-        <st.icon size={11} />
-        {st.label}
-      </span>
-    </button>
+    </div>
   );
 }
-
-export default ProductRow;

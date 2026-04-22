@@ -26,59 +26,34 @@ import { CAT_ICON, stockStatus } from "@/helpers/productHelper";
 import ProductCard from "@/components/userComponents/productsComponents/ProductCard";
 import ProductRow from "@/components/userComponents/productsComponents/ProductRow";
 import ProductDetail from "@/components/userComponents/productsComponents/ProductDetail";
+import { useQuery } from "@tanstack/react-query";
+import { getProducts } from "@/services/product.service";
+import { Product } from "@/types/productsType";
+import ProductResults from "@/components/userComponents/productsComponents/ProductResults";
 
 
 type SortKey = "name" | "price-asc" | "price-desc" | "stock-asc" | "stock-desc";
 
 
 export default function ProductPage() {
-  const [search, setSearch] = useState("");
-  const [filterCat, setFilterCat] = useState<string>("all");
-  const [filterStatus, setFilterStatus] = useState<string>("all");
-  const [sort, setSort] = useState<SortKey>("name");
   const [view, setView] = useState<"grid" | "list">("grid");
-  const [selected, setSelected] = useState<StockItem | null>(null);
-  const [dialogOpen, setDialogOpen] = useState(false);
 
-  const filtered = useMemo(() => {
-    let items = [...stockItems];
 
-    if (search)
-      items = items.filter(
-        (i) =>
-          i.name.toLowerCase().includes(search.toLowerCase()) ||
-          i.id.toLowerCase().includes(search.toLowerCase()) ||
-          i.nameAr.includes(search)
-      );
-    if (filterCat !== "all") items = items.filter((i) => i.category === filterCat);
-    if (filterStatus !== "all")
-      items = items.filter((i) => stockStatus(i) === filterStatus);
+  const { data: products = [], isLoading } = useQuery({
+    queryKey: ["products"],
+    queryFn: getProducts,
+  });
 
-    items.sort((a, b) => {
-      if (sort === "name") return a.name.localeCompare(b.name);
-      if (sort === "price-asc") return a.price - b.price;
-      if (sort === "price-desc") return b.price - a.price;
-      if (sort === "stock-asc") return a.stock - b.stock;
-      if (sort === "stock-desc") return b.stock - a.stock;
-      return 0;
-    });
+  
+ 
 
-    return items;
-  }, [search, filterCat, filterStatus, sort]);
-
-  function openDetail(item: StockItem) {
-    setSelected(item);
-    setDialogOpen(true);
-  }
-
-  // Category counts
-  const catCounts = useMemo(() => {
-    const map: Record<string, number> = { all: stockItems.length };
-    for (const c of categories)
-      map[c] = stockItems.filter((i) => i.category === c).length;
-    return map;
-  }, []);
-
+  if (isLoading) {
+  return (
+    <div className="flex justify-center py-20 text-zinc-400">
+      Loading products...
+    </div>
+  );
+}
   return (
     <div className="min-h-screen bg-zinc-50">
       {/* ── Top Bar ── */}
@@ -87,8 +62,8 @@ export default function ProductPage() {
           <div>
             <h1 className="text-base font-bold text-zinc-900">Catalogue Produits</h1>
             <p className="text-xs text-zinc-400">
-              {filtered.length} article{filtered.length !== 1 ? "s" : ""} trouvé
-              {filtered.length !== 1 ? "s" : ""}
+              {products.length} article{products.length !== 1 ? "s" : ""} trouvé
+              {products.length !== 1 ? "s" : ""}
             </p>
           </div>
 
@@ -118,9 +93,8 @@ export default function ProductPage() {
         </div>
       </header>
 
-      <div className="mx-auto max-w-7xl px-6 py-6">
-        {/* ── Category Pills ── */}
-        <div className="mb-5 flex flex-wrap gap-2">
+      <div className="mx-auto max-w-7xl px-4 py-6">
+        {/* <div className="mb-5 flex flex-wrap gap-2">
           {(["all", ...categories] as const).map((cat) => (
             <button
               key={cat}
@@ -142,10 +116,9 @@ export default function ProductPage() {
               </span>
             </button>
           ))}
-        </div>
+        </div> */}
 
-        {/* ── Filters Row ── */}
-        <div className="mb-6 flex flex-wrap items-center gap-3">
+        {/* <div className="mb-6 flex flex-wrap items-center gap-3">
           <div className="relative flex-1 min-w-48">
             <Search
               size={13}
@@ -184,46 +157,13 @@ export default function ProductPage() {
               <SelectItem value="stock-desc">Stock décroissant</SelectItem>
             </SelectContent>
           </Select>
-        </div>
+        </div> */}
 
         {/* ── Product Grid / List ── */}
-        {filtered.length === 0 ? (
-          <div className="flex flex-col items-center justify-center gap-3 py-24 text-zinc-400">
-            <span className="text-5xl">🔍</span>
-            <p className="text-sm font-medium">Aucun article trouvé</p>
-            <Button
-              variant="outline"
-              size="sm"
-              onClick={() => {
-                setSearch("");
-                setFilterCat("all");
-                setFilterStatus("all");
-              }}
-            >
-              Réinitialiser les filtres
-            </Button>
-          </div>
-        ) : view === "grid" ? (
-          <div className="grid grid-cols-2 gap-4 sm:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5">
-            {filtered.map((item) => (
-              <ProductCard key={item.id} item={item} onClick={() => openDetail(item)} />
-            ))}
-          </div>
-        ) : (
-          <div className="flex flex-col gap-2">
-            {filtered.map((item) => (
-              <ProductRow key={item.id} item={item} onClick={() => openDetail(item)} />
-            ))}
-          </div>
-        )}
+       <ProductResults products={products} view={view} />
       </div>
 
-      {/* ── Detail Dialog ── */}
-      <ProductDetail
-        item={selected}
-        open={dialogOpen}
-        onClose={() => setDialogOpen(false)}
-      />
+    
     </div>
   );
 }

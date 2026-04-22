@@ -1,79 +1,89 @@
-import { StockItem } from "@/data/mektaba-stock";
-import { CAT_ACCENT, CAT_GRADIENTS, CAT_ICON, CAT_TEXT, formatMAD, STATUS_MAP, stockStatus } from "@/helpers/productHelper";
+"use client";
 
-function ProductCard({
-  item,
-  onClick,
-}: {
-  item: StockItem;
-  onClick: () => void;
-}) {
-  const status = stockStatus(item);
-  const st = STATUS_MAP[status];
-  const grad = CAT_GRADIENTS[item.category];
-  const accent = CAT_ACCENT[item.category];
-  const stockPct = Math.min(100, Math.round((item.stock / (item.minStock * 5)) * 100));
+import { Card, CardContent, CardHeader } from "@/components/ui/card";
+import { Badge } from "@/components/ui/badge";
+import { formatCompactDate } from "@/helpers/date";
+import { Product } from "@/types/productsType";
+
+export default function ProductCard({ product }: { product: Product }) {
+  const isLowStock = product?.stock <= product?.minStock;
 
   return (
-    <button
-      onClick={onClick}
-      className="group relative flex flex-col overflow-hidden rounded-2xl border border-zinc-100 bg-white text-left shadow-sm transition-all duration-200 hover:-translate-y-0.5 hover:shadow-md focus:outline-none focus-visible:ring-2 focus-visible:ring-zinc-400"
-    >
-      {/* Top colour band */}
-      <div className={`relative flex h-28 items-center justify-center bg-gradient-to-br ${grad}`}>
-        <span className="text-4xl select-none">{CAT_ICON[item.category]}</span>
-        {/* Status dot */}
-        <span
-          className={`absolute right-3 top-3 h-2.5 w-2.5 rounded-full ring-2 ring-white ${st.dot}`}
-        />
-        {/* Category pill */}
-        <span
-          className={`absolute bottom-3 left-3 rounded-full px-2 py-0.5 text-[10px] font-semibold uppercase tracking-wide ${CAT_TEXT[item.category]} bg-white/70 backdrop-blur-sm`}
-        >
-          {item.category}
-        </span>
-      </div>
+    <Card className="group w-full overflow-hidden border bg-background shadow-sm transition hover:shadow-md">
 
-      {/* Body */}
-      <div className="flex flex-1 flex-col gap-2 p-4">
-        <div>
-          <p className="text-[10px] font-mono text-zinc-400">{item.id}</p>
-          <h3 className="mt-0.5 text-sm font-semibold leading-tight text-zinc-800 line-clamp-2">
-            {item.name}
-          </h3>
-          <p className="mt-0.5 text-xs text-zinc-400" dir="rtl">
-            {item.nameAr}
-          </p>
-        </div>
+      {/* HEADER */}
+      <CardHeader className="space-y-2 p-2 sm:p-4">
 
-        <div className="mt-auto flex items-end justify-between">
-          <span className="text-base font-bold text-zinc-900">
-            {formatMAD(item.price)}
-          </span>
-          <span
-            className={`flex items-center gap-1 rounded-full px-2 py-0.5 text-[11px] font-medium ${st.pill}`}
+        <div className="flex items-start justify-between gap-2">
+
+          {/* IMAGE */}
+          <div className="h-8 w-8 sm:h-11 sm:w-11 shrink-0 rounded-md border bg-muted flex items-center justify-center">
+            <span className="text-[8px] sm:text-[10px] text-muted-foreground">
+              IMG
+            </span>
+          </div>
+
+          {/* TITLE */}
+          <div className="flex-1 min-w-0">
+            <h2 className="max-w-[80px] sm:max-w-[150px] text-[11px] sm:text-sm font-semibold truncate">
+              {product?.name}
+            </h2>
+            <p className="max-w-[80px] sm:max-w-[150px] text-[9px] sm:text-xs text-muted-foreground truncate">
+              {product?.nameAr}
+            </p>
+          </div>
+
+          {/* STATUS */}
+          <Badge
+            variant={isLowStock ? "destructive" : "secondary"}
+            className="text-[9px] sm:text-[11px] px-1.5 py-0"
           >
-            <st.icon size={11} />
-            {st.label}
+            {isLowStock ? "Stock faible" : "OK"}
+          </Badge>
+        </div>
+
+        {/* CATEGORY */}
+        <div className="flex flex-wrap gap-1">
+          {product?.categories?.map((c, i) => (
+            <Badge
+              key={i}
+              variant="outline"
+              className="text-[8px] sm:text-[10px] px-1 py-0"
+            >
+              {c.category.name}
+            </Badge>
+          ))}
+        </div>
+      </CardHeader>
+
+      {/* BODY */}
+      <CardContent className="space-y-1.5 p-2 sm:p-4 pt-0 text-[10px] sm:text-sm">
+
+        <div className="flex justify-between">
+          <span className="text-muted-foreground">Réf</span>
+          <span className="font-medium">{product?.ref}</span>
+        </div>
+
+        <div className="flex justify-between">
+          <span className="text-muted-foreground">Prix</span>
+          <span className="font-semibold">{product?.price} MAD</span>
+        </div>
+
+        <div className="flex justify-between">
+          <span className="text-muted-foreground">Stock</span>
+          <span className={isLowStock ? "text-red-500 font-semibold" : ""}>
+            {product?.stock}
           </span>
         </div>
 
-        {/* Mini stock bar */}
-        <div className="space-y-1">
-          <div className="flex justify-between text-[10px] text-zinc-400">
-            <span>Stock</span>
-            <span className="font-medium text-zinc-600">{item.stock} / min {item.minStock}</span>
-          </div>
-          <div className="h-1.5 w-full overflow-hidden rounded-full bg-zinc-100">
-            <div
-              className={`h-full rounded-full transition-all ${accent}`}
-              style={{ width: `${stockPct}%` }}
-            />
-          </div>
+        <div className="flex justify-between text-[9px] sm:text-xs">
+          <span className="text-muted-foreground">Réapprovisionné</span>
+          <span className="text-muted-foreground">
+            {formatCompactDate(product?.lastRestocked)}
+          </span>
         </div>
-      </div>
-    </button>
+
+      </CardContent>
+    </Card>
   );
 }
-
-export default ProductCard;
