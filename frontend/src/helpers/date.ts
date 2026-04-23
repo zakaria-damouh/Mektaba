@@ -57,3 +57,11 @@ export function formatRelativeDate(date?: string | Date) {
 
   return formatDistanceToNow(d, { addSuffix: true });
 }
+
+export function formatCategoryDate(date: string | Date, pattern: string = "PPP") {
+  try {
+    return format(new Date(date), pattern);
+  } catch {
+    return "Invalid date";
+  }
+}

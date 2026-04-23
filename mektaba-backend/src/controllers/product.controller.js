@@ -2,7 +2,7 @@ import { getAllProductsService, getProductByIdService } from "../services/produc
 
 export async function GetAllProducts(req, res) {
   try {
-    const products = await getAllProductsService();
+    const products = await getAllProductsService(req.query);
     res.json({ success: true, count: products.length, data: products });
   } catch (error) {
     res.status(500).json({ success: false, message: error.message });

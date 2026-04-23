@@ -6,6 +6,7 @@ export const ROUTES = {
     },
     USER:{
         DASHBOARD:"/user/dashboard",
-        PRODUCTS:"/user/products"
+        PRODUCTS:"/user/products",
+        CATEGORIES:"/user/categories"
     }
 }

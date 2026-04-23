@@ -13,6 +13,7 @@ import {
 
 import { FiHome, FiBox, FiShoppingCart, FiSettings } from "react-icons/fi";
 import { ROUTES } from "@/lib/routes";
+import { BiCategory } from "react-icons/bi";
 
 export function AppSidebar() {
   const pathname = usePathname();
@@ -20,7 +21,7 @@ export function AppSidebar() {
   const items = [
     { label: "Dashboard", href: ROUTES.USER.DASHBOARD, icon: FiHome },
     { label: "Products", href: ROUTES.USER.PRODUCTS, icon: FiBox },
-    { label: "Orders", href: "/orders", icon: FiShoppingCart },
+    { label: "Categories", href: ROUTES.USER.CATEGORIES, icon: BiCategory },
     { label: "Settings", href: "/settings", icon: FiSettings },
   ];
 

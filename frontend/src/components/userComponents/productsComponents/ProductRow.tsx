@@ -22,8 +22,8 @@ export default function ProductRow({ products }: { products: Product[] }) {
         <Table>
           <TableHeader>
             <TableRow className="hover:bg-transparent border-b">
+              <TableHead>Réf</TableHead>
               <TableHead>Produit</TableHead>
-              <TableHead>Référence</TableHead>
               <TableHead>Catégorie</TableHead>
               <TableHead className="text-right">Prix</TableHead>
               <TableHead className="text-right">Stock</TableHead>
@@ -40,6 +40,11 @@ export default function ProductRow({ products }: { products: Product[] }) {
                   key={product?.id}
                   className="hover:bg-muted/40 transition"
                 >
+
+                  <TableCell className="text-muted-foreground text-sm">
+                    {product?.ref}
+                  </TableCell>
+
                   <TableCell>
                     <div className="flex items-center gap-3">
                       <div className="h-10 w-10 rounded-md bg-muted border flex items-center justify-center">
@@ -57,10 +62,7 @@ export default function ProductRow({ products }: { products: Product[] }) {
                     </div>
                   </TableCell>
 
-                  <TableCell className="text-muted-foreground text-sm">
-                    {product?.ref}
-                  </TableCell>
-
+               
                   <TableCell>
                     <Badge variant="outline" className="text-xs">
                       {product?.categories?.[0]?.category?.name}
