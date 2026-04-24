@@ -12,8 +12,14 @@ import {
 import { Badge } from "@/components/ui/badge";
 import { formatDate } from "@/helpers/date";
 import { Product } from "@/types/productsType";
+import { useRouter } from "next/navigation";
 
 export default function ProductRow({ products }: { products: Product[] }) {
+  const router = useRouter();
+
+  const handleNavigate = (id: number) => {
+    router.push(`/user/products/${id}`);
+  }
   return (
     <div className="rounded-xl border bg-background shadow-sm overflow-hidden">
 
@@ -37,8 +43,9 @@ export default function ProductRow({ products }: { products: Product[] }) {
 
               return (
                 <TableRow
+                  onClick={() => handleNavigate(product?.id)}
                   key={product?.id}
-                  className="hover:bg-muted/40 transition"
+                  className="hover:bg-muted/40 transition cursor-pointer"
                 >
 
                   <TableCell className="text-muted-foreground text-sm">

@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { Input } from "@/components/ui/input";
 import {
   Select,
@@ -18,22 +18,17 @@ import {
   Search,
   LayoutList,
   LayoutGrid,
-  SlidersHorizontal,
   CheckCircle2,
   AlertTriangle,
   XCircle,
   Circle,
-} from "lucide-react";
-import {
   ArrowUpAZ,
-  ArrowDownAZ,
   ArrowUpWideNarrow,
   ArrowDownWideNarrow,
 } from "lucide-react";
 import PaginationButton from "@/components/userComponents/elements/PaginationButton";
 import { Button } from "@/components/ui/button";
 import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/ui/tooltip";
-import { FiX } from "react-icons/fi";
 import { AiOutlineClear } from "react-icons/ai";
 
 type SortKey = "name" | "price-asc" | "price-desc" | "stock-asc" | "stock-desc";
@@ -46,6 +41,7 @@ export default function ProductPage() {
   const [sort, setSort] = useState<SortKey>("name");
   const [selectedCategoryIds, setSelectedCategoryIds] = useState<number[]>([]);
   const [pagination, setPagination] = useState({ page: 1, limit: 10 });
+  const topRef = useRef<HTMLDivElement>(null);
 
   const { data: products = [], isLoading } = useQuery({
     queryKey: ["products", selectedCategoryIds, search, filterStatus, sort, pagination.page, pagination.limit],
@@ -61,6 +57,10 @@ export default function ProductPage() {
   useEffect(() => {
     setPagination({ ...pagination, page: 1 });
   }, [selectedCategoryIds, search, filterStatus, sort]);
+
+  useEffect(() => {
+    topRef.current?.scrollIntoView({ behavior: "smooth" });
+  }, [pagination.page]);
 
   const handleCategoryChange = (id: number, checked: boolean) => {
     setSelectedCategoryIds((prev) =>
@@ -83,7 +83,7 @@ export default function ProductPage() {
   };
 
   return (
-    <div className="min-h-screen bg-[#F7F7F7]">
+    <div  ref={topRef}  className="min-h-screen bg-[#F7F7F7]">
 
       {/* ── Header ── */}
       <header className="sticky top-0 z-20 bg-white border-b border-zinc-100">
@@ -148,7 +148,7 @@ export default function ProductPage() {
               Tous
             </button>
 
-            {(categories as any).data?.map((category: Category) => {
+            {categories.data?.map((category: Category) => {
               const isSelected = selectedCategoryIds.includes(category?.id);
 
               return (

@@ -9,3 +9,10 @@ export type Category = {
     products: number;
   };
 };
+
+export type ProductCategory = {
+  id: number;
+  productId: number;
+  categoryId: number;
+  category: Category;
+};

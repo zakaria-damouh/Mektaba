@@ -19,3 +19,9 @@ export const getProducts = async (
   const res = await axiosClient.get("/products", { params });
   return res.data;
 };
+
+
+export const getProductById = async (id: number) => {
+  const res = await axiosClient.get(`/products/${id}`);
+  return res.data;
+}

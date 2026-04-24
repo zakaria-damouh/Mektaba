@@ -1,3 +1,5 @@
+import { ProductCategory } from "./categoriesType";
+
 export type Product = {
   id: number;
   ref: string;
@@ -8,11 +10,6 @@ export type Product = {
   minStock: number;
   supplier: string;
   lastRestocked: string;
-  categories: {
-    category: {
-      name: string;
-      nameAr: string;
-    };
-  }[];
+  categories: ProductCategory[];
 };
 
