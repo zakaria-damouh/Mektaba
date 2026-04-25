@@ -1,4 +1,4 @@
-import { getAllProductsService, getProductByIdService } from "../services/product.service.js";
+import { createProductService, getAllProductsService, getProductByIdService } from "../services/product.service.js";
 
 export async function GetAllProducts(req, res) {
   try {
@@ -16,6 +16,18 @@ export async function GetProductById(req, res) {
       return res.status(404).json({ success: false, message: "Product not found" });
     }
     res.json({ success: true, data: product });
+  } catch (error) {
+    res.status(500).json({ success: false, message: error.message });
+  }
+}
+
+export async function createProduct(req, res) {
+  try {
+    const data = req.body;
+
+    await createProductService(data);
+
+    res.status(201).json({ success: true, message: "Product created successfully" });
   } catch (error) {
     res.status(500).json({ success: false, message: error.message });
   }

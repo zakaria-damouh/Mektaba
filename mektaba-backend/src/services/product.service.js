@@ -10,15 +10,15 @@ export async function getAllProductsService(params = {}) {
     sortBy,
   } = params;
 
-  // ✅ pagination
+  // pagination
   const take = Math.min(Number(limit) || 20, 100);
   const currentPage = Math.max(Number(page) || 1, 1);
   const skip = (currentPage - 1) * take;
 
-  //  search sanitization
+  // search sanitization
   const safeSearch = String(search).trim().slice(0, 50);
 
-  //  category parsing
+  // category parsing
   const parsedIds = categoryIds
     ? String(categoryIds)
         .split(",")
@@ -26,7 +26,7 @@ export async function getAllProductsService(params = {}) {
         .filter((id) => Number.isFinite(id))
     : [];
 
-  // ✅ safe sorting (whitelist)
+  // safe sorting (whitelist)
   const orderByMap = {
     name: { name: "asc" },
     "price-asc": { price: "asc" },
@@ -37,16 +37,16 @@ export async function getAllProductsService(params = {}) {
 
   const orderBy = orderByMap[sortBy] || { ref: "asc" };
 
-  //  IMPORTANT: initialize where
   const where = {};
 
-  //  filters
+  // category filter
   if (parsedIds.length) {
     where.categories = {
       some: { categoryId: { in: parsedIds } },
     };
   }
 
+  // search filter
   if (safeSearch) {
     where.OR = [
       { name: { contains: safeSearch, mode: "insensitive" } },
@@ -54,47 +54,52 @@ export async function getAllProductsService(params = {}) {
     ];
   }
 
-  //  stock filters (DB side where possible)
+  // stock filter — only "critical" is safe to do fully on DB side
+  // "low" and "ok" require column-to-column comparison (stock vs minStock)
+  // so we fetch and filter in JS, but WITHOUT skip/take to keep count accurate
+  const needsJsFilter = stock === "low" || stock === "ok";
+
   if (stock === "critical") {
     where.stock = 0;
   }
 
-  if (stock === "low") {
-    where.stock = { gt: 0 };
-  }
+  let data, finalTotal;
 
-  //  fetch + count
-  const [products, total] = await Promise.all([
-    prisma.product.findMany({
+  if (needsJsFilter) {
+    // fetch all matching rows (no skip/take) then filter + paginate in JS
+    const allProducts = await prisma.product.findMany({
       where,
       include: {
-        categories: {
-          include: { category: true },
-        },
+        categories: { include: { category: true } },
       },
       orderBy,
-      skip,
-      take,
-    }),
-    prisma.product.count({ where }),
-  ]);
+    });
 
-  // ⚠️ refine stock logic (JS side)
-  let data = products;
+    const filtered =
+      stock === "low"
+        ? allProducts.filter((p) => p.stock > 0 && p.stock <= p.minStock)
+        : allProducts.filter((p) => p.stock > p.minStock); // ok
 
-  if (stock === "ok") {
-    data = products.filter((p) => p.stock > p.minStock);
+    finalTotal = filtered.length;
+    data = filtered.slice(skip, skip + take);
+  } else {
+    // fully DB-side: pagination + count are accurate
+    const [products, total] = await Promise.all([
+      prisma.product.findMany({
+        where,
+        include: {
+          categories: { include: { category: true } },
+        },
+        orderBy,
+        skip,
+        take,
+      }),
+      prisma.product.count({ where }),
+    ]);
+
+    data = products;
+    finalTotal = total;
   }
-
-  if (stock === "low") {
-    data = products.filter(
-      (p) => p.stock > 0 && p.stock <= p.minStock
-    );
-  }
-
-  // ⚠️ adjust total when filtering in JS
-  const finalTotal =
-    stock === "ok" || stock === "low" ? data.length : total;
 
   const totalPages = Math.ceil(finalTotal / take);
 
@@ -108,12 +113,61 @@ export async function getAllProductsService(params = {}) {
 }
 
 export async function getProductByIdService(id) {
-  return prisma.product.findUnique({
+  const product = await prisma.product.findUnique({
     where: { id: Number(id) },
     include: {
+      categories: { include: { category: true } },
+    },
+  });
+
+  if (!product) throw new Error(`Product with id ${id} not found`);
+
+  return product;
+}
+
+export async function createProductService(data) {
+  const {
+    name,
+    nameAr,
+    ref,
+    price,
+    stock,
+    minStock,
+    supplier,
+    lastRestocked,
+    categoryIds = [],
+  } = data;
+
+  if (categoryIds.length) {
+    const existingCategories = await prisma.category.findMany({
+      where: { id: { in: categoryIds } },
+      select: { id: true },
+    });
+
+    const existingIds = existingCategories.map((c) => c.id);
+    const invalidIds = categoryIds.filter((id) => !existingIds.includes(id));
+
+    if (invalidIds.length) {
+      throw new Error(`Invalid category IDs: ${invalidIds.join(", ")}`);
+    }
+  }
+
+  return prisma.product.create({
+    data: {
+      name,
+      nameAr,
+      ref,
+      price,
+      stock,
+      minStock,
+      supplier,
+      lastRestocked,
       categories: {
-        include: { category: true },
+        create: categoryIds.map((id) => ({ categoryId: id })),
       },
+    },
+    include: {
+      categories: { include: { category: true } },
     },
   });
 }

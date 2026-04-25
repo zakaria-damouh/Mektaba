@@ -11,15 +11,17 @@ import {
   SidebarHeader,
 } from "@/components/ui/sidebar";
 
-import { FiHome, FiBox, FiShoppingCart, FiSettings } from "react-icons/fi";
+import { FiHome, FiBox, FiSettings } from "react-icons/fi";
 import { ROUTES } from "@/lib/routes";
 import { BiCategory } from "react-icons/bi";
+import { PlusIcon } from "lucide-react";
 
 export function AppSidebar() {
   const pathname = usePathname();
 
   const items = [
     { label: "Dashboard", href: ROUTES.USER.DASHBOARD, icon: FiHome },
+    { label: "Add Product", href: ROUTES.USER.ADD_PRODUCT, icon: PlusIcon },
     { label: "Products", href: ROUTES.USER.PRODUCTS, icon: FiBox },
     { label: "Categories", href: ROUTES.USER.CATEGORIES, icon: BiCategory },
     { label: "Settings", href: "/settings", icon: FiSettings },
