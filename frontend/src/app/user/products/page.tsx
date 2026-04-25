@@ -30,6 +30,7 @@ import PaginationButton from "@/components/userComponents/elements/PaginationBut
 import { Button } from "@/components/ui/button";
 import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/ui/tooltip";
 import { AiOutlineClear } from "react-icons/ai";
+import { useDebouncedValue } from "@/hooks/useDebouncedValue";
 
 type SortKey = "name" | "price-asc" | "price-desc" | "stock-asc" | "stock-desc";
 type FilterStatus = "all" | "ok" | "low" | "critical";
@@ -43,15 +44,17 @@ export default function ProductPage() {
   const [pagination, setPagination] = useState({ page: 1, limit: 10 });
   const topRef = useRef<HTMLDivElement>(null);
 
+  const debouncedSearch = useDebouncedValue(search, 300);
+
   const { data: products = [], isLoading } = useQuery({
-    queryKey: ["products", selectedCategoryIds, search, filterStatus, sort, pagination.page, pagination.limit],
-    queryFn:  () => getProducts(selectedCategoryIds, search, filterStatus, sort, pagination.page, pagination.limit)
+    queryKey: ["products", selectedCategoryIds, debouncedSearch, filterStatus, sort, pagination.page, pagination.limit],
+    queryFn:  () => getProducts(selectedCategoryIds, debouncedSearch, filterStatus, sort, pagination.page, pagination.limit)
   });
  const totalPages = products?.totalPages ?? 1;
 
   const { data: categories = [], isLoading: isCategoriesLoading } = useQuery({
     queryKey: ["categories"],
-    queryFn: getCategories,
+    queryFn: () => getCategories(),
   });
 
   useEffect(() => {
@@ -93,7 +96,7 @@ export default function ProductPage() {
               Catalogue
             </h1>
             <p className="text-xs text-zinc-400 mt-0.5">
-              {products.total} article{products.total !== 1 ? "s" : ""} disponible{products.total !== 1 ? "s" : ""}
+              {products?.total} article{products?.total !== 1 ? "s" : ""} disponible{products?.total !== 1 ? "s" : ""}
             </p>
           </div>
 
@@ -101,7 +104,7 @@ export default function ProductPage() {
           <div className="flex items-center gap-0.5 rounded-xl border border-zinc-200 bg-zinc-50 p-1">
             <button
               onClick={() => setView("grid")}
-              className={`rounded-lg p-2 transition-all ${
+              className={`rounded-lg p-2 transition-all cursor-pointer ${
                 view === "grid"
                   ? "bg-white shadow-sm text-zinc-800"
                   : "text-zinc-400 hover:text-zinc-600"
@@ -111,7 +114,7 @@ export default function ProductPage() {
             </button>
             <button
               onClick={() => setView("list")}
-              className={`rounded-lg p-2 transition-all ${
+              className={`rounded-lg p-2 transition-all cursor-pointer ${
                 view === "list"
                   ? "bg-white shadow-sm text-zinc-800"
                   : "text-zinc-400 hover:text-zinc-600"
@@ -381,7 +384,7 @@ export default function ProductPage() {
 
         {/* ── Results ── */}
        
-          <ProductResults products={products.data} view={view} isLoading={isLoading} />
+          <ProductResults products={products?.data} view={view} isLoading={isLoading} />
         
           <PaginationButton
             page={pagination.page}

@@ -1,28 +1,29 @@
 "use client";
 
 import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
 import { CategoryCard } from "@/components/userComponents/categoriesComponents/CategoryCard";
+import { CategoryCardSkeleton } from "@/components/userComponents/categoriesComponents/loading/CategoryCardSkeleton";
+import { useDebouncedValue } from "@/hooks/useDebouncedValue";
 import { getCategories } from "@/services/category.service";
 import { Category } from "@/types/categoriesType";
 import { useQuery } from "@tanstack/react-query";
+import { Search } from "lucide-react";
 import { useState } from "react";
 import { TbCategoryPlus } from "react-icons/tb";
 
 
 function CategoriesPage() {
+  const [search, setSearch] = useState("");
+
+  const debouncedSearch = useDebouncedValue(search, 300);
 
     const {data: categories = [] , isLoading} = useQuery({
-        queryKey:["categories"],
-        queryFn:getCategories
+        queryKey:["categories", debouncedSearch],
+        queryFn: () => getCategories(debouncedSearch)
     })
 
-    if(isLoading) {
-        return (
-            <div className="flex justify-center py-20 text-zinc-400">
-                Loading categories...
-            </div>
-        )
-    }
+
   return (
     <div className="min-h-screen bg-zinc-50">
 
@@ -31,8 +32,8 @@ function CategoriesPage() {
           <div>
             <h1 className="text-base font-bold text-zinc-900">Categories</h1>
             <p className="text-xs text-zinc-400">
-              {categories.count} catégorie{categories.count !== 1 ? "s" : ""} trouvée
-              {categories.count !== 1 ? "s" : ""}
+              {categories?.count} catégorie{categories?.count !== 1 ? "s" : ""} trouvée
+              {categories?.count !== 1 ? "s" : ""}
             </p>
           </div>
 
@@ -46,11 +47,54 @@ function CategoriesPage() {
         </div>
       </header>
 
+      <div className=" flex justify-end px-4 py-6">
+          <div className="relative md:max-w-5/12 flex-1 min-w-56">
+            <Search
+              size={15}
+              className="
+                absolute left-4 top-1/2 -translate-y-1/2
+                text-zinc-400
+                pointer-events-none
+                z-50
+              "
+            />
+  
+            <Input
+              placeholder="Rechercher une catégorie..."
+              value={search}
+              onChange={(e) => setSearch(e.target.value)}
+              className="
+                h-8 w-full
+                rounded-full
+                border border-zinc-200/70
+                bg-white/80 backdrop-blur
+                pl-11 pr-4
+                text-sm text-zinc-700
+                placeholder:text-zinc-400
+                shadow-sm
+                transition-all
+  
+                hover:bg-white
+                focus-visible:bg-white
+                focus-visible:ring-2 focus-visible:ring-zinc-200
+                focus-visible:ring-offset-1
+              "
+            />
+          </div>
+      </div>
+
       <div className="mx-auto max-w-7xl px-4 py-6">
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-3 sm:gap-4">
-            {categories.data?.map((category: Category) => (
+          {isLoading ? (
+            [...Array(8)].map((_, i) => (
+              <CategoryCardSkeleton key={i} />
+            ))
+          ) : 
+          (
+            categories?.data?.map((category: Category) => (
             <CategoryCard key={category.id} category={category} />
-            ))}
+            ))
+          )}
         </div>
       </div>
     </div>

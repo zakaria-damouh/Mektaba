@@ -13,12 +13,13 @@ import { Badge } from "@/components/ui/badge";
 import { formatDate } from "@/helpers/date";
 import { Product } from "@/types/productsType";
 import { useRouter } from "next/navigation";
+import { ROUTES } from "@/lib/routes";
 
 export default function ProductRow({ products }: { products: Product[] }) {
   const router = useRouter();
 
   const handleNavigate = (id: number) => {
-    router.push(`/user/products/${id}`);
+    router.push(ROUTES.USER.PRODUCTS_DETAILS(id));
   }
   return (
     <div className="rounded-xl border bg-background shadow-sm overflow-hidden">

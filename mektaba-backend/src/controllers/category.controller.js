@@ -2,7 +2,7 @@ import { getAllCategoriesService, getCategoryByIdService } from "../services/cat
 
 export async function GetAllCategories(req, res) {
   try {
-    const categories = await getAllCategoriesService();
+    const categories = await getAllCategoriesService(req.query);
     res.json({ success: true, count: categories.length, data: categories });
   } catch (error) {
     res.status(500).json({ success: false, message: error.message });

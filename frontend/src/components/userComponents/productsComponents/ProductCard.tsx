@@ -4,12 +4,15 @@ import { Card, CardContent, CardHeader } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { formatCompactDate } from "@/helpers/date";
 import { Product } from "@/types/productsType";
+import { useRouter } from "next/navigation";
+import { ROUTES } from "@/lib/routes";
 
 export default function ProductCard({ product }: { product: Product }) {
   const isLowStock = product?.stock <= product?.minStock;
+  const router = useRouter();
 
   return (
-    <Card className="group w-full overflow-hidden border bg-background shadow-sm transition hover:shadow-md">
+    <Card onClick={() => router.push(ROUTES.USER.PRODUCTS_DETAILS(product.id))}  className="group w-full overflow-hidden border bg-background shadow-sm transition hover:shadow-md hover:scale-105 cursor-pointer">
 
       {/* HEADER */}
       <CardHeader className="space-y-2 p-2 sm:p-4">
