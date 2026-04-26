@@ -1,8 +1,11 @@
 "use client";
 
 import { Button } from "@/components/ui/button";
+import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { Input } from "@/components/ui/input";
 import { CategoryCard } from "@/components/userComponents/categoriesComponents/CategoryCard";
+import EmptyCategories from "@/components/userComponents/categoriesComponents/EmptyCategories";
+import CategoryAddForm from "@/components/userComponents/categoriesComponents/forms/CategoryAddForm";
 import { CategoryCardSkeleton } from "@/components/userComponents/categoriesComponents/loading/CategoryCardSkeleton";
 import { useDebouncedValue } from "@/hooks/useDebouncedValue";
 import { getCategories } from "@/services/category.service";
@@ -15,6 +18,7 @@ import { TbCategoryPlus } from "react-icons/tb";
 
 function CategoriesPage() {
   const [search, setSearch] = useState("");
+  const [isAddCategoryOpen, setIsAddCategoryOpen] = useState(false);
 
   const debouncedSearch = useDebouncedValue(search, 300);
 
@@ -39,7 +43,7 @@ function CategoriesPage() {
 
           {/* View toggle */}
           <div className="flex items-center gap-1 rounded-lg ">
-            <Button variant="outline" size="sm" className="flex items-center gap-2">
+            <Button variant="outline" onClick={() => setIsAddCategoryOpen(true)} size="sm" className="flex items-center gap-2 cursor-pointer">
                 <TbCategoryPlus />
                 <span>Ajouter une catégorie</span>
             </Button>
@@ -84,6 +88,10 @@ function CategoriesPage() {
       </div>
 
       <div className="mx-auto max-w-7xl px-4 py-6">
+
+        {!isLoading && categories?.data?.length === 0 ? (
+          <EmptyCategories />
+        ) : (
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-3 sm:gap-4">
           {isLoading ? (
             [...Array(8)].map((_, i) => (
@@ -96,7 +104,24 @@ function CategoriesPage() {
             ))
           )}
         </div>
+        )}
       </div>
+
+      <Dialog open={isAddCategoryOpen} onOpenChange={setIsAddCategoryOpen}>
+            <DialogContent className="sm:max-w-xl rounded-2xl p-0 overflow-hidden">
+              
+              {/* Header */}
+              <DialogHeader className="px-6 pt-6 pb-2 space-y-1">
+                <DialogTitle className="text-lg font-semibold text-zinc-900">
+                  Ajouter une catégorie
+                </DialogTitle>
+                <DialogDescription className="text-sm text-zinc-500">
+                  Remplissez les informations pour créer une nouvelle catégorie.
+                </DialogDescription>
+              </DialogHeader>
+          <CategoryAddForm setIsAddCategoryOpen={setIsAddCategoryOpen} />
+        </DialogContent>
+      </Dialog>
     </div>
   );
 }

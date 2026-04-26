@@ -8,3 +8,8 @@ export const getCategories = async (search?: string) => {
   const res = await axiosClient.get("/categories", {params});
   return res.data;
 }
+
+export const postCategory = async (data: {name: string, nameAr: string}) => {
+  const res = await axiosClient.post("/categories", data);
+  return res.data;
+}

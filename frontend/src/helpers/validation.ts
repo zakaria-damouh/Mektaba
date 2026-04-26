@@ -52,3 +52,20 @@ export const productSchema = z
     message: "Le stock minimum ne peut pas être supérieur au stock",
     path: ["minStock"],
   });
+
+
+export const categorySchema = z.object({
+  name: z
+    .string()
+    .min(1, "Le nom est requis")
+    .min(2, "Le nom doit contenir au moins 2 caractères")
+    .max(100, "Le nom ne doit pas dépasser 100 caractères")
+    .trim(),
+
+  nameAr: z
+    .string()
+    .min(1, "Le nom en arabe est requis")
+    .min(2, "Le nom en arabe doit contenir au moins 2 caractères")
+    .max(100, "Le nom en arabe ne doit pas dépasser 100 caractères")
+    .trim(),
+});
