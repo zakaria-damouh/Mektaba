@@ -32,14 +32,25 @@ import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/ui/tooltip
 import { AiOutlineClear } from "react-icons/ai";
 import { useDebouncedValue } from "@/hooks/useDebouncedValue";
 
-type SortKey = "name" | "price-asc" | "price-desc" | "stock-asc" | "stock-desc";
+type SortKey = "name" | "price-asc" | "price-desc" | "stock-asc" | "stock-desc" | "created-asc" | "created-desc";
 type FilterStatus = "all" | "ok" | "low" | "critical";
+
+const sortOptions = [
+  { value: "created-desc", label: "Plus récent", icon: ArrowDownWideNarrow },
+  { value: "created-asc", label: "Plus ancien", icon: ArrowUpWideNarrow },
+
+  { value: "price-asc", label: "Prix croissant", icon: ArrowUpWideNarrow },
+  { value: "price-desc", label: "Prix décroissant", icon: ArrowDownWideNarrow },
+
+  { value: "stock-desc", label: "Plus en stock", icon: ArrowDownWideNarrow },
+  { value: "stock-asc", label: "Moins en stock", icon: ArrowUpWideNarrow },
+];
 
 export default function ProductPage() {
   const [view, setView] = useState<"grid" | "list">("list");
   const [search, setSearch] = useState("");
   const [filterStatus, setFilterStatus] = useState<FilterStatus>("all");
-  const [sort, setSort] = useState<SortKey>("name");
+  const [sort, setSort] = useState<SortKey>("created-desc");
   const [selectedCategoryIds, setSelectedCategoryIds] = useState<number[]>([]);
   const [pagination, setPagination] = useState({ page: 1, limit: 10 });
   const topRef = useRef<HTMLDivElement>(null);
@@ -75,15 +86,17 @@ export default function ProductPage() {
   selectedCategoryIds.length > 0 ||
   search !== "" ||
   filterStatus !== "all" ||
-  sort !== "name";
+  sort !== "created-desc";
 
   const clearFilters = () => {
     setSelectedCategoryIds([]);
     setSearch("");
     setFilterStatus("all");
-    setSort("name");
+    setSort("created-desc");
     setPagination({ ...pagination, page: 1 });
   };
+
+
 
   return (
     <div  ref={topRef}  className="min-h-screen bg-[#F7F7F7]">
@@ -313,39 +326,17 @@ export default function ProductPage() {
               <SelectValue placeholder="Trier par" />
             </SelectTrigger>
 
-            <SelectContent
-              className="
-                rounded-2xl
-                border border-zinc-200/60
-                shadow-lg
-                p-1
-                bg-white
-              "
-            >
-              <SelectItem className="flex items-center gap-2 rounded-xl px-3 py-2 text-sm hover:bg-zinc-100" value="name">
-                <ArrowUpAZ size={14} className="text-zinc-500" />
-                Nom A → Z
-              </SelectItem>
-
-              <SelectItem className="flex items-center gap-2 rounded-xl px-3 py-2 text-sm hover:bg-zinc-100" value="price-asc">
-                <ArrowUpWideNarrow size={14} className="text-zinc-500" />
-                Prix croissant
-              </SelectItem>
-
-              <SelectItem className="flex items-center gap-2 rounded-xl px-3 py-2 text-sm hover:bg-zinc-100" value="price-desc">
-                <ArrowDownWideNarrow size={14} className="text-zinc-500" />
-                Prix décroissant
-              </SelectItem>
-
-              <SelectItem className="flex items-center gap-2 rounded-xl px-3 py-2 text-sm hover:bg-zinc-100" value="stock-asc">
-                <ArrowUpWideNarrow size={14} className="text-zinc-500" />
-                Stock croissant
-              </SelectItem>
-
-              <SelectItem className="flex items-center gap-2 rounded-xl px-3 py-2 text-sm hover:bg-zinc-100" value="stock-desc">
-                <ArrowDownWideNarrow size={14} className="text-zinc-500" />
-                Stock décroissant
-              </SelectItem>
+            <SelectContent className="rounded-2xl border border-zinc-200/60 shadow-lg p-1 bg-white">
+              {sortOptions.map(({ value, label, icon: Icon }) => (
+                <SelectItem
+                  key={value}
+                  value={value}
+                  className="flex items-center gap-2 rounded-xl px-3 py-2 text-sm hover:bg-zinc-100 focus:bg-zinc-100 transition-colors cursor-pointer"
+                >
+                  <Icon size={14} className="text-zinc-500" />
+                  {label}
+                </SelectItem>
+              ))}
             </SelectContent>
           </Select>
 

@@ -33,6 +33,8 @@ export async function getAllProductsService(params = {}) {
     "price-desc": { price: "desc" },
     "stock-asc": { stock: "asc" },
     "stock-desc": { stock: "desc" },
+    "created-asc": { createdAt: "asc" },
+    "created-desc": { createdAt: "desc" },
   };
 
   const orderBy = orderByMap[sortBy] || { ref: "asc" };

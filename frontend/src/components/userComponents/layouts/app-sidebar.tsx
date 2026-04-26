@@ -9,6 +9,7 @@ import {
   SidebarFooter,
   SidebarGroup,
   SidebarHeader,
+  useSidebar,
 } from "@/components/ui/sidebar";
 
 import { FiHome, FiBox, FiSettings } from "react-icons/fi";
@@ -18,6 +19,7 @@ import { PlusIcon } from "lucide-react";
 
 export function AppSidebar() {
   const pathname = usePathname();
+  const { setOpen, isMobile } = useSidebar();
 
   const items = [
     { label: "Dashboard", href: ROUTES.USER.DASHBOARD, icon: FiHome },
@@ -39,23 +41,20 @@ export function AppSidebar() {
       <SidebarContent>
         <SidebarGroup>
           <div className="flex flex-col gap-1 px-2">
-            {items.map((item) => {
+            {items.map((item , i : number) => {
               const Icon = item.icon;
               const isActive = pathname === item.href;
 
               return (
-                <Link key={item.href} href={item.href}>
-                  <div
-                    className={`flex items-center gap-2 px-3 py-2 rounded-md text-sm transition
-                      ${
-                        isActive
-                          ? "bg-primary text-white"
-                          : "hover:bg-muted"
-                      }`}
-                  >
-                    <Icon className="w-4 h-4" />
-                    {item.label}
-                  </div>
+                <Link
+                  key={i}
+                  href={item.href}
+                  onClick={() => isMobile && setOpen(false)}
+                  className={`flex items-center gap-2 px-3 py-2 rounded-md text-sm transition
+                    ${isActive ? "bg-primary text-white" : "hover:bg-muted"}`}
+                >
+                  <Icon className="w-4 h-4" />
+                  {item.label}
                 </Link>
               );
             })}

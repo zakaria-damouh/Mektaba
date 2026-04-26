@@ -12,30 +12,39 @@ import { productSchema } from "@/helpers/validation";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { postProduct } from "@/services/product.service";
 import { Loader2 } from "lucide-react";
+import { AxiosError } from "axios";
+import { ROUTES } from "@/lib/routes";
+import { useRouter } from "next/navigation";
 
 
 
 type ProductFormValues = z.input<typeof productSchema>;
 
+type ApiError = {
+  success: boolean;
+  message: string;
+};
+
 
 function AddProductForm({ categories = [] }: { categories?: Category[] }) {
+  const router = useRouter();
   const {
     register,
     handleSubmit,
     setValue,
     watch,
     setError,
-    formState: { errors, isSubmitting },
+    formState: { errors },
   } = useForm<ProductFormValues>({
     resolver: zodResolver(productSchema),
    defaultValues: {
-        ref: "BUR-002",
-        name: "Chaise de bureau",
-        nameAr: "كرسي مكتب",
-        price: 299,
-        stock: 50,
-        minStock: 10,
-        supplier: "MeublesPro",
+        ref: "",
+        name: "",
+        nameAr: "",
+        price: 0,
+        stock: 0,
+        minStock: 0,
+        supplier: "",
         categoryIds: [],
         },
   });
@@ -44,25 +53,34 @@ function AddProductForm({ categories = [] }: { categories?: Category[] }) {
 
    const queryClient = useQueryClient();
 
-  const { mutate, isPending } = useMutation({
-    mutationFn: postProduct,
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ["products"] });
-    },
-    onError: (error) => {
-      setError("root", { message: error.response?.data?.message });
-    },
-  });
+    const { mutate, isPending } = useMutation({
+      mutationFn: postProduct,
+      onSuccess: async () => {
+        await queryClient.invalidateQueries({ queryKey: ["products"] });
+        router.push(ROUTES.USER.PRODUCTS);
+      },
+      onError: (error: AxiosError<ApiError>) => {
+        const message =
+          error.response?.data?.message || "Une erreur est survenue";
 
+        setError("root", {
+          type: "server",
+          message,
+        });
+      }
+    });
 
-  const onSubmit = (values: ProductFormValues) => {
-    const payload = {
-      ...values,
-      categoryIds: values.categoryIds.map((id: string) => Number(id)),
+    const onSubmit = (values: ProductFormValues) => {
+      const payload = {
+        ...values,
+        categoryIds: values.categoryIds
+          .map((id) => Number(id))
+          .filter((id) => !isNaN(id)),
+      };
+
+      mutate(payload);
     };
 
-    mutate(payload);
-  };
 
   return (
     <div className="mx-auto max-w-3xl p-6 space-y-6">
