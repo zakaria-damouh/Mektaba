@@ -29,6 +29,9 @@ export async function CreateProduct(req, res) {
 
     res.status(201).json({ success: true, message: "Product created successfully" });
   } catch (error) {
+    if (error.message.includes("already exists")) {
+      return res.status(409).json({ success: false, message: error.message });
+    }
     res.status(500).json({ success: false, message: error.message });
   }
 }

@@ -25,3 +25,8 @@ export const getProductById = async (id: number) => {
   const res = await axiosClient.get(`/products/${id}`);
   return res.data;
 }
+
+export const postProduct = async (productData: any) => {
+  const res = await axiosClient.post("/products", productData);
+  return res.data;
+}

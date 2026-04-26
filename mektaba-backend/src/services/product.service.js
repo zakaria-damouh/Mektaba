@@ -138,6 +138,15 @@ export async function createProductService(data) {
     categoryIds = [],
   } = data;
 
+  if (ref ) {
+    const existingProduct = await prisma.product.findUnique({
+      where: { ref },
+    });
+    if (existingProduct) {
+      throw new Error(`Product with reference ${ref} already exists`);
+    }
+  }
+
   if (categoryIds.length) {
     const existingCategories = await prisma.category.findMany({
       where: { id: { in: categoryIds } },
@@ -161,7 +170,7 @@ export async function createProductService(data) {
       stock,
       minStock,
       supplier,
-      lastRestocked,
+      lastRestocked: lastRestocked ?? new Date(),
       categories: {
         create: categoryIds.map((id) => ({ categoryId: id })),
       },

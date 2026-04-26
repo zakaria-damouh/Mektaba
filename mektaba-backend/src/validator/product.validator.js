@@ -1,9 +1,5 @@
-import { body, param } from "express-validator";
+import { body } from "express-validator";
 
-const idValidator = param("id")
-  .optional()
-  .isInt({ min: 1 })
-  .withMessage("id must be a positive integer");
  
 const nameValidator = body("name")
   .notEmpty()
@@ -64,13 +60,7 @@ const supplierValidator = body("supplier")
   .isLength({ min: 2, max: 100 })
   .withMessage("supplier must be between 2 and 100 characters")
   .trim();
- 
-const lastRestockedValidator = body("lastRestocked")
-  .notEmpty()
-  .withMessage("lastRestocked is required")
-  .isISO8601()
-  .withMessage("lastRestocked must be a valid ISO 8601 date")
-  .toDate();
+
  
 export const createProductValidator = [
   nameValidator,
@@ -80,5 +70,4 @@ export const createProductValidator = [
   stockValidator,
   minStockValidator,
   supplierValidator,
-  lastRestockedValidator,
 ];

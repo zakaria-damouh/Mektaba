@@ -1,7 +1,20 @@
+"use client";
+
 import AddProductForm from "@/components/userComponents/productsComponents/forms/AddProductForm";
+import { getCategories } from "@/services/category.service";
+import { useQuery } from "@tanstack/react-query";
 
 
 function AddProductPage() {
+
+
+    const {data , isLoading} = useQuery({
+        queryKey : ["categories"],
+        queryFn : () => getCategories()
+    })
+
+    const categories = data?.data || [];
+    
     return(
         <div>
             <header className="sticky top-0 z-20 border-b border-zinc-200 bg-white/80 backdrop-blur-sm">
@@ -14,7 +27,7 @@ function AddProductPage() {
                 
                 </div>
             </header>
-            <AddProductForm />
+            <AddProductForm  categories={categories}/>
         </div>
     );
 }
