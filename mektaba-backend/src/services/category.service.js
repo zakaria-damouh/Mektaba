@@ -35,3 +35,14 @@ export async function getCategoryByIdService(id) {
     },
   });
 }
+
+export async function createCategoryService(data) {
+  const { name , nameAr } = data;
+
+  return prisma.category.create({
+    data: {
+      name,
+      nameAr,
+    },
+  });
+}
