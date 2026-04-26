@@ -21,7 +21,7 @@ export async function GetProductById(req, res) {
   }
 }
 
-export async function createProduct(req, res) {
+export async function CreateProduct(req, res) {
   try {
     const data = req.body;
 
