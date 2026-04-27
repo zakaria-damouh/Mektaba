@@ -67,7 +67,7 @@ export default function ProductForm({
     defaultValues,
   });
 
-  const selectedCategories = watch("categoryIds");
+  const selectedCategories = watch("categoryIds") || [];
 
   /* ---------------- MUTATION ---------------- */
   const { mutate, isPending } = useMutation({
@@ -127,133 +127,78 @@ export default function ProductForm({
       </div>
     )}
 
-    {/* REF */}
-    <div className="space-y-2">
-      <Label className="text-sm text-zinc-700">Référence</Label>
-      <Input
-        {...register("ref")}
-        className="h-11 rounded-xl border-zinc-200 focus-visible:ring-2 focus-visible:ring-black/20"
-      />
-    </div>
-
-    {/* NAME */}
-    <div className="space-y-2">
-      <Label className="text-sm text-zinc-700">Nom</Label>
-      <Input
-        {...register("name")}
-        className="h-11 rounded-xl border-zinc-200 focus-visible:ring-2 focus-visible:ring-black/20"
-      />
-    </div>
-
-    {/* NAME AR */}
-    <div className="space-y-2">
-      <Label className="text-sm text-zinc-700">الاسم بالعربية</Label>
-      <Input
-        {...register("nameAr")}
-        className="h-11 rounded-xl border-zinc-200 focus-visible:ring-2 focus-visible:ring-black/20 text-right"
-      />
-    </div>
-
-    {/* GRID */}
-    <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+      {/* REF */}
       <div className="space-y-2">
-        <Label className="text-sm text-zinc-700">Prix</Label>
+        <Label className="text-sm text-zinc-700">Référence</Label>
         <Input
-          type="number"
-          {...register("price")}
-          className="h-11 rounded-xl border-zinc-200"
+          placeholder="Ex : STY-001 ou LIV-023"
+          {...register("ref")}
+          className="h-11 rounded-xl border-zinc-200 focus-visible:ring-2 focus-visible:ring-black/20"
         />
       </div>
 
+      {/* NAME */}
       <div className="space-y-2">
-        <Label className="text-sm text-zinc-700">Stock</Label>
+        <Label className="text-sm text-zinc-700">Nom</Label>
         <Input
-          type="number"
-          {...register("stock")}
-          className="h-11 rounded-xl border-zinc-200"
+          placeholder="Ex : Cahier 96 pages / Stylo bleu Bic"
+          {...register("name")}
+          className="h-11 rounded-xl border-zinc-200 focus-visible:ring-2 focus-visible:ring-black/20"
         />
       </div>
 
+      {/* NAME AR */}
       <div className="space-y-2">
-        <Label className="text-sm text-zinc-700">Stock minimum</Label>
+        <Label className="text-sm text-zinc-700">الاسم بالعربية</Label>
         <Input
-          type="number"
-          {...register("minStock")}
+          placeholder="مثال: دفتر 96 صفحة / قلم أزرق"
+          {...register("nameAr")}
+          className="h-11 rounded-xl border-zinc-200 focus-visible:ring-2 focus-visible:ring-black/20 text-right"
+        />
+      </div>
+
+      {/* GRID */}
+      <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+        <div className="space-y-2">
+          <Label className="text-sm text-zinc-700">Prix</Label>
+          <Input
+            type="number"
+            placeholder="Ex : 3.50 (DH)"
+            {...register("price")}
+            className="h-11 rounded-xl border-zinc-200"
+          />
+        </div>
+
+        <div className="space-y-2">
+          <Label className="text-sm text-zinc-700">Stock</Label>
+          <Input
+            type="number"
+            placeholder="Ex : 120"
+            {...register("stock")}
+            className="h-11 rounded-xl border-zinc-200"
+          />
+        </div>
+
+        <div className="space-y-2">
+          <Label className="text-sm text-zinc-700">Stock minimum</Label>
+          <Input
+            type="number"
+            placeholder="Ex : 10"
+            {...register("minStock")}
+            className="h-11 rounded-xl border-zinc-200"
+          />
+        </div>
+      </div>
+
+      {/* SUPPLIER */}
+      <div className="space-y-2">
+        <Label className="text-sm text-zinc-700">Fournisseur</Label>
+        <Input
+          placeholder="Ex : Papeterie Atlas / Fournisseur local"
+          {...register("supplier")}
           className="h-11 rounded-xl border-zinc-200"
         />
       </div>
-    </div>
-
-    {/* SUPPLIER */}
-    <div className="space-y-2">
-      <Label className="text-sm text-zinc-700">Fournisseur</Label>
-      <Input
-        {...register("supplier")}
-        className="h-11 rounded-xl border-zinc-200"
-      />
-    </div>
-
-    {/* CATEGORIES */}
-    <div className="space-y-3">
-      <div>
-        <Label className="text-sm text-zinc-700">Catégorie</Label>
-        <p className="text-xs text-zinc-400">
-          Sélectionnez une ou plusieurs catégories
-        </p>
-      </div>
-
-      <div className="grid grid-cols-2 md:grid-cols-3 gap-3">
-        {categories.map((cat: any) => {
-          const isChecked = selectedCategories.includes(String(cat.id));
-
-          return (
-            <label
-              key={cat.id}
-              className={`flex items-center justify-between px-4 py-3 rounded-2xl border cursor-pointer transition-all duration-150
-              ${
-                isChecked
-                  ? "border-black bg-black text-white shadow-sm"
-                  : "border-zinc-200 bg-white hover:border-zinc-400"
-              }`}
-            >
-              <span className="text-sm font-medium">{cat.name}</span>
-
-              <input
-                type="checkbox"
-                value={String(cat.id)}
-                checked={isChecked}
-                onChange={(e) => {
-                  if (e.target.checked) {
-                    setValue("categoryIds", [
-                      ...selectedCategories,
-                      e.target.value,
-                    ]);
-                  } else {
-                    setValue(
-                      "categoryIds",
-                      selectedCategories.filter(
-                        (id: string) => id !== e.target.value
-                      )
-                    );
-                  }
-                }}
-                className="hidden"
-              />
-
-              <span
-                className={`w-4 h-4 rounded-full border flex items-center justify-center
-                ${isChecked ? "border-white" : "border-zinc-300"}`}
-              >
-                {isChecked && (
-                  <span className="w-2 h-2 rounded-full bg-white" />
-                )}
-              </span>
-            </label>
-          );
-        })}
-      </div>
-    </div>
-
     {/* SUBMIT */}
     <Button
       className="w-full h-11 rounded-xl text-sm font-medium shadow-sm hover:shadow-md transition-all cursor-pointer"
