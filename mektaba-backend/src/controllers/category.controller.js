@@ -1,4 +1,4 @@
-import { createCategoryService, getAllCategoriesService, getCategoryByIdService } from "../services/category.service.js";
+import { createCategoryService, deleteCategoryService, getAllCategoriesService, getCategoryByIdService } from "../services/category.service.js";
 
 export async function GetAllCategories(req, res) {
   try {
@@ -26,6 +26,18 @@ export async function CreateCategory(req, res) {
     const category = await createCategoryService(req.body);
     res.status(201).json({ success: true, data: category });
   } catch (error) {
+    res.status(500).json({ success: false, message: error.message });
+  }
+}
+
+export async function DeleteCategory(req, res) {
+  try {
+    const category = await deleteCategoryService(req.params.id);
+    res.json({ success: true, data: category });
+  } catch (error) {
+    if (error.message.includes("associated with products")) {
+      return res.status(400).json({ success: false, message: error.message });
+    }
     res.status(500).json({ success: false, message: error.message });
   }
 }

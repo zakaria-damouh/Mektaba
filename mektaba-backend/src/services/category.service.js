@@ -46,3 +46,18 @@ export async function createCategoryService(data) {
     },
   });
 }
+
+export const deleteCategoryService = async (id) => {
+
+  const isCategoryUsed = await prisma.productCategory.findFirst({
+    where: { categoryId: Number(id) },
+  });
+
+  if (isCategoryUsed) {
+    throw new Error("Cannot delete category that is associated with products");
+  }
+  
+  return prisma.category.delete({
+    where: { id: Number(id) },
+  });
+}

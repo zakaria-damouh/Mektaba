@@ -8,17 +8,27 @@ import EmptyCategories from "@/components/userComponents/categoriesComponents/Em
 import CategoryAddForm from "@/components/userComponents/categoriesComponents/forms/CategoryAddForm";
 import { CategoryCardSkeleton } from "@/components/userComponents/categoriesComponents/loading/CategoryCardSkeleton";
 import { useDebouncedValue } from "@/hooks/useDebouncedValue";
-import { getCategories } from "@/services/category.service";
+import { deleteCategory, getCategories } from "@/services/category.service";
 import { Category } from "@/types/categoriesType";
-import { useQuery } from "@tanstack/react-query";
-import { Search } from "lucide-react";
-import { useState } from "react";
+import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
+import { AxiosError } from "axios";
+import { Search, X } from "lucide-react";
+import { useEffect, useRef, useState } from "react";
 import { TbCategoryPlus } from "react-icons/tb";
 
+
+type APIError = {
+  success: boolean;
+  message: string;
+};
 
 function CategoriesPage() {
   const [search, setSearch] = useState("");
   const [isAddCategoryOpen, setIsAddCategoryOpen] = useState(false);
+  const [deleteError, setDeleteError] = useState<string | null>(null);
+  const errorRef = useRef<HTMLDivElement | null>(null);
+
+  const queryClient = useQueryClient();
 
   const debouncedSearch = useDebouncedValue(search, 300);
 
@@ -27,11 +37,33 @@ function CategoriesPage() {
         queryFn: () => getCategories(debouncedSearch)
     })
 
+    const { mutate: deleteCategoryMutate, isPending } = useMutation({
+      mutationFn: deleteCategory,
+
+      onSuccess: () => {
+        queryClient.invalidateQueries({ queryKey: ["categories"] });
+        setDeleteError(null);
+      },
+
+      onError: (error : AxiosError<APIError>) => {
+        console.error("Delete failed:", error);
+        setDeleteError(error.response?.data?.message || "An error occurred");
+      },
+    });
+
+    useEffect(() => {
+      if (deleteError && errorRef.current) {
+        errorRef.current.scrollIntoView({
+          behavior: "smooth",
+          block: "center", 
+        });
+      }
+    }, [deleteError]);
 
   return (
     <div className="min-h-screen bg-zinc-50">
 
-        <header className="sticky top-0 z-20 border-b border-zinc-200 bg-white/80 backdrop-blur-sm">
+        <header className="sticky top-0 z-30 border-b border-zinc-200 bg-white/80 backdrop-blur-sm">
         <div className="mx-auto flex max-w-7xl items-center justify-between px-6 py-4">
           <div>
             <h1 className="text-base font-bold text-zinc-900">Categories</h1>
@@ -59,7 +91,7 @@ function CategoriesPage() {
                 absolute left-4 top-1/2 -translate-y-1/2
                 text-zinc-400
                 pointer-events-none
-                z-50
+                z-20
               "
             />
   
@@ -89,6 +121,26 @@ function CategoriesPage() {
 
       <div className="mx-auto max-w-7xl px-4 py-6">
 
+       {deleteError && (
+          <div ref={errorRef} className="mb-4 flex items-start justify-between gap-3 rounded-xl border border-red-200 bg-red-50 px-4 py-3">
+            
+            {/* Text */}
+            <div className="flex-1">
+              <p className="text-sm text-red-600 mt-0.5">
+                {deleteError}
+              </p>
+            </div>
+
+            {/* Close button */}
+            <button
+              onClick={() => setDeleteError(null)}
+              className="shrink-0 rounded-md p-1 text-red-600 hover:bg-red-100 transition cursor-pointer"
+            >
+              <X className="w-4 h-4" />
+            </button>
+          </div>
+        )}
+
         {!isLoading && categories?.data?.length === 0 ? (
           <EmptyCategories />
         ) : (
@@ -100,7 +152,7 @@ function CategoriesPage() {
           ) : 
           (
             categories?.data?.map((category: Category) => (
-            <CategoryCard key={category.id} category={category} />
+            <CategoryCard key={category.id} category={category}  onDelete={deleteCategoryMutate} isPending={isPending} />
             ))
           )}
         </div>

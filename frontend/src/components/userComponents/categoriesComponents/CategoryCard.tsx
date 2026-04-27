@@ -2,7 +2,7 @@
 
 import { Card, CardContent } from "@/components/ui/card";
 import { Category } from "@/types/categoriesType";
-import { Package, Pencil, Trash2 } from "lucide-react";
+import { Loader2, Package, Pencil, Trash2 } from "lucide-react";
 
 import {
   AlertDialog,
@@ -21,10 +21,10 @@ import { useState } from "react";
 type Props = {
   category: Category;
   onEdit?: (id: number) => void;
-  onDelete?: (id: number) => void;
+  onDelete?: (id: number) => unknown; 
+  isPending?: boolean;
 };
-
-export function CategoryCard({ category, onEdit, onDelete }: Props) {
+export function CategoryCard({ category, onEdit, onDelete, isPending }: Props) {
     const [isDialogOpen, setIsDialogOpen] = useState(false);
   return (
     <Card className="group relative rounded-2xl border border-border/50 bg-background transition-all duration-300 hover:shadow-md">
@@ -65,7 +65,7 @@ export function CategoryCard({ category, onEdit, onDelete }: Props) {
                     e.stopPropagation();
                     setIsDialogOpen(true);
                   }}
-                  className="p-2 rounded-full hover:bg-destructive/10 transition"
+                  className="p-2 rounded-full hover:bg-destructive/10 transition cursor-pointer"
                 >
                   <Trash2 className="w-4 h-4 text-destructive" />
                 </Button>
@@ -94,27 +94,50 @@ export function CategoryCard({ category, onEdit, onDelete }: Props) {
         </div>
 
       </CardContent>
-                  <AlertDialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
-              <AlertDialogContent>
-                <AlertDialogHeader>
-                  <AlertDialogTitle>Delete category?</AlertDialogTitle>
-                  <AlertDialogDescription>
-                    This will permanently delete{" "}
-                    <span className="font-medium">{category.name}</span>.
-                  </AlertDialogDescription>
-                </AlertDialogHeader>
+      <AlertDialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
+        <AlertDialogContent className="!max-w-lg rounded-2xl p-0 overflow-hidden">
+          
+          {/* Header */}
+          <AlertDialogHeader className="px-6 pt-6 pb-2 space-y-2">
+            <AlertDialogTitle className="text-lg font-semibold text-zinc-900">
+              Supprimer la catégorie ?
+            </AlertDialogTitle>
 
-                <AlertDialogFooter>
-                  <AlertDialogCancel>Cancel</AlertDialogCancel>
-                  <AlertDialogAction
-                    onClick={() => onDelete?.(category.id)}
-                    className="!bg-destructive text-white hover:bg-destructive/90"
-                  >
-                    Delete
-                  </AlertDialogAction>
-                </AlertDialogFooter>
-              </AlertDialogContent>
-            </AlertDialog>
+            <AlertDialogDescription className="text-sm text-zinc-500 leading-relaxed">
+              Cette action est irréversible. La catégorie{" "}
+              <span className="font-medium text-zinc-900">
+                {category.name}
+              </span>{" "}
+              sera définitivement supprimée.
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+
+        
+
+          {/* Footer */}
+          <AlertDialogFooter className="!bg-white px-6 pb-6 flex justify-end gap-3">
+            
+            <AlertDialogCancel className="!rounded-full px-4 h-10 text-sm cursor-pointer">
+              Annuler
+            </AlertDialogCancel>
+
+            <AlertDialogAction
+              onClick={() => onDelete?.(category.id)}
+              disabled={isPending}
+              className="!rounded-full px-4 h-10 bg-red-600 text-white hover:bg-red-700 transition-all cursor-pointer"
+            >
+              {isPending ? (
+                <span className="flex items-center gap-2">
+                  Suppression...
+                  <Loader2 className="w-4 h-4 animate-spin" />
+                </span>
+              ) : (
+                "Supprimer"
+              )}
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
     </Card>
   );
 }
