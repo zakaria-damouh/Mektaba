@@ -1,6 +1,6 @@
 "use client";
 
-import AddProductForm from "@/components/userComponents/productsComponents/forms/AddProductForm";
+import ProductForm from "@/components/userComponents/productsComponents/forms/ProductForm";
 import { getCategories } from "@/services/category.service";
 import { useQuery } from "@tanstack/react-query";
 
@@ -27,7 +27,7 @@ function AddProductPage() {
                 
                 </div>
             </header>
-            <AddProductForm  categories={categories}/>
+            <ProductForm mode="create" categories={categories} />
         </div>
     );
 }

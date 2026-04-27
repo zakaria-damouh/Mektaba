@@ -71,3 +71,14 @@ export const createProductValidator = [
   minStockValidator,
   supplierValidator,
 ];
+
+
+export const updateProductValidator = [
+  nameValidator.optional(),
+  nameArValidator.optional(),
+  refValidator.optional(),
+  priceValidator.optional(),
+  stockValidator.optional(),
+  minStockValidator.optional(),
+  supplierValidator.optional(),
+];

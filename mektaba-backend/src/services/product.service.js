@@ -193,8 +193,47 @@ export async function deleteProductService(id) {
   if (!existingProduct) {
     throw new Error(`Product with id ${id} not found`);
   }
-  
+
   return prisma.product.delete({
     where: { id: Number(id) },
+  });
+}
+
+export async function updateProductService(id, data) {
+  const productId = Number(id);
+
+  const existingProduct = await prisma.product.findUnique({
+    where: { id: productId },
+  });
+
+  if (!existingProduct) {
+    throw new Error(`Product with id ${id} not found`);
+  }
+
+  const { categoryIds = [], ...rest } = data;
+
+  return prisma.product.update({
+    where: { id: productId },
+    data: {
+      ...rest,
+
+      categories: {
+        // 🔥 remove all existing relations
+        deleteMany: {},
+
+        // 🔥 recreate with new categoryIds
+        create: categoryIds.map((catId) => ({
+          categoryId: catId,
+        })),
+      },
+    },
+
+    include: {
+      categories: {
+        include: {
+          category: true, // optional (gives full category data)
+        },
+      },
+    },
   });
 }

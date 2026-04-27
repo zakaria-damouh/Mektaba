@@ -1,8 +1,8 @@
 "use client";
 
-import { getProductById } from "@/services/product.service";
-import { useQuery } from "@tanstack/react-query";
-import { use } from "react";
+import { deleteProduct, getProductById } from "@/services/product.service";
+import { useMutation, useQuery } from "@tanstack/react-query";
+import { use, useState } from "react";
 
 import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
@@ -24,6 +24,20 @@ import {
 } from "react-icons/fi";
 import { Button } from "@/components/ui/button";
 import { useRouter } from "next/navigation";
+import { AlertDialog, AlertDialogContent, AlertDialogDescription, AlertDialogHeader, AlertDialogTitle } from "@/components/ui/alert-dialog";
+import { ROUTES } from "@/lib/routes";
+import { toast } from "sonner";
+import { AxiosError } from "axios";
+import { Loader2 } from "lucide-react";
+import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
+import { getCategories } from "@/services/category.service";
+import ProductForm from "@/components/userComponents/productsComponents/forms/ProductForm";
+import { ScrollArea } from "@/components/ui/scroll-area";
+
+type APIError = {
+  success: boolean;
+  message: string;
+};
 
 function ProductDetailsPage({
   params,
@@ -32,6 +46,8 @@ function ProductDetailsPage({
 }) {
   const { id } = use(params);
   const router = useRouter();
+  const [isDeleteDialogOpen, setIsDeleteDialogOpen] = useState(false);
+  const [isEditDialogOpen, setIsEditDialogOpen] = useState(false);
 
   const { data, isLoading } = useQuery({
     queryKey: ["product", id],
@@ -39,8 +55,28 @@ function ProductDetailsPage({
   });
 
   const product = data?.data;
+  
 
-  // ✅ Loading state
+  const {mutate: deleteProductMutate, isPending} = useMutation({
+    mutationFn: deleteProduct,
+    onSuccess: () => {
+      router.push(ROUTES.USER.PRODUCTS);
+      toast.success("Produit supprimé avec succès");
+      setIsDeleteDialogOpen(false);
+    },
+    onError: (error : AxiosError<APIError>) => {
+      console.error("Delete failed:", error);
+      toast.error(error.response?.data?.message || "Échec de la suppression du produit");
+    },
+  });
+
+      const {data: categoriesData, isLoading: isCategoriesLoading} = useQuery({
+          queryKey : ["categories"],
+          queryFn : () => getCategories()
+      })
+  
+      const categories = categoriesData?.data || [];
+
   if (isLoading) {
     return (
       <div className="max-w-5xl mx-auto px-4 py-10">
@@ -208,18 +244,86 @@ function ProductDetailsPage({
 
                 <Separator />
 
-                <button className="w-full h-11 rounded-xl bg-black text-white text-sm font-medium flex items-center justify-center gap-2 hover:bg-zinc-800 transition">
+                <Button variant={"outline"} className="w-full h-11 rounded-full cursor-pointer" onClick={() => setIsEditDialogOpen(true)}>
                   <FiEdit /> Modifier
-                </button>
+                </Button>
 
-                <button className="w-full h-11 rounded-xl border text-sm font-medium flex items-center justify-center gap-2 hover:bg-zinc-100 transition">
+                <Button variant={"destructive"} className="w-full h-11 rounded-full cursor-pointer" onClick={() => setIsDeleteDialogOpen(true)}>
                   <FiTrash2 /> Supprimer
-                </button>
+                </Button>
               </CardContent>
             </Card>
           </div>
         </div>
       </div>
+
+      <Dialog open={isEditDialogOpen} onOpenChange={setIsEditDialogOpen}>
+        <DialogContent className="!max-w-2xl rounded-3xl p-0 overflow-hidden border border-zinc-200 shadow-xl">
+          {/* Header */}
+          <DialogHeader className="px-6 pt-6 pb-3 space-y-2">
+            <DialogTitle className="text-xl font-semibold text-zinc-900">
+              Modifier le produit
+            </DialogTitle>
+          </DialogHeader>
+          <ScrollArea className="h-[550px]">
+            <div className="p-6">
+              <ProductForm
+                mode="edit"
+                product={product}
+                categories={categories}
+                setIsEditDialogOpen={setIsEditDialogOpen}
+              />
+              </div>
+            </ScrollArea>
+          </DialogContent>
+      </Dialog>
+
+    <AlertDialog open={isDeleteDialogOpen} onOpenChange={setIsDeleteDialogOpen}>
+      <AlertDialogContent className="max-w-md rounded-3xl p-0 overflow-hidden border border-zinc-200 shadow-xl">
+        
+        {/* Header */}
+        <AlertDialogHeader className="px-6 pt-6 pb-3 space-y-2">
+          <AlertDialogTitle className="text-xl font-semibold text-zinc-900">
+            Supprimer le produit ?
+          </AlertDialogTitle>
+          <AlertDialogDescription className="text-sm text-zinc-500 leading-relaxed">
+            Cette action est irréversible. Le produit sera définitivement supprimé.
+          </AlertDialogDescription>
+        </AlertDialogHeader>
+
+        {/* Divider */}
+        <div className="border-t border-zinc-100" />
+
+        {/* Actions */}
+        <div className="flex items-center justify-end gap-3 px-6 py-4">
+          
+          <Button
+            variant="ghost"
+            className="rounded-full px-4 h-10 text-zinc-600 cursor-pointer  hover:bg-zinc-100 hover:text-zinc-900 transition"
+            onClick={() => setIsDeleteDialogOpen(false)}
+          >
+            Annuler
+          </Button>
+
+          <Button
+            variant="destructive"
+            className="rounded-full px-5 h-10 cursor-pointer transition-all"
+            onClick={() => deleteProductMutate(product?.id)}
+            disabled={isPending}
+          >
+            {isPending ? (
+              <div className="flex items-center gap-2">
+                <Loader2 className="animate-spin" size={16} />
+                <span>Suppression...</span>
+              </div>
+            ) : (
+              "Supprimer"
+            )}
+          </Button>
+
+        </div>
+      </AlertDialogContent>
+    </AlertDialog>
     </div>
   );
 }
