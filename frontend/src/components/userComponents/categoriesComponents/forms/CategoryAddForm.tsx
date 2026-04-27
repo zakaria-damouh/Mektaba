@@ -99,7 +99,7 @@ function CategoryAddForm({setIsAddCategoryOpen} : {setIsAddCategoryOpen: (open: 
                     type="button"
                     variant="ghost"
                     onClick={() => setIsAddCategoryOpen(false)}
-                    className="rounded-full px-6 py-4"
+                    className="rounded-full px-6 py-4 cursor-pointer"
                     >
                     Annuler
                     </Button>

@@ -20,3 +20,5 @@ const nameArValidator = body("nameAr")
   .trim();
 
 export const createCategoryValidator = [nameValidator, nameArValidator];
+
+export const updateCategoryValidator = [nameValidator.optional(), nameArValidator.optional()];

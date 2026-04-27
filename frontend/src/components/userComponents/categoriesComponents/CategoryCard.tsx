@@ -17,6 +17,8 @@ import {
 } from "@/components/ui/alert-dialog";
 import { Button } from "@/components/ui/button";
 import { useState } from "react";
+import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } from "@/components/ui/dialog";
+import CategoryEditForm from "./forms/CategoryEditForm";
 
 type Props = {
   category: Category;
@@ -24,8 +26,9 @@ type Props = {
   onDelete?: (id: number) => unknown; 
   isPending?: boolean;
 };
-export function CategoryCard({ category, onEdit, onDelete, isPending }: Props) {
+export function CategoryCard({ category, onDelete, isPending }: Props) {
     const [isDialogOpen, setIsDialogOpen] = useState(false);
+    const [isEditDialogOpen, setIsEditDialogOpen] = useState(false);
   return (
     <Card className="group relative rounded-2xl border border-border/50 bg-background transition-all duration-300 hover:shadow-md">
       
@@ -52,9 +55,9 @@ export function CategoryCard({ category, onEdit, onDelete, isPending }: Props) {
             variant={"ghost"}
               onClick={(e) => {
                 e.stopPropagation();
-                onEdit?.(category.id);
+                setIsEditDialogOpen(true);
               }}
-              className="p-2 rounded-full hover:bg-muted transition"
+              className="p-2 rounded-full hover:bg-muted transition cursor-pointer" 
             >
               <Pencil className="w-4 h-4 text-muted-foreground" />
             </Button>
@@ -138,6 +141,26 @@ export function CategoryCard({ category, onEdit, onDelete, isPending }: Props) {
           </AlertDialogFooter>
         </AlertDialogContent>
       </AlertDialog>
+
+
+      {/* Edit Dialog */}
+      <Dialog open={isEditDialogOpen} onOpenChange={setIsEditDialogOpen}>
+        <DialogContent className="sm:max-w-xl rounded-2xl p-0 overflow-hidden">
+          <DialogHeader className="px-6 pt-6 pb-2 space-y-1">
+            <DialogTitle className="text-lg font-semibold text-zinc-900">
+              Modifier la catégorie
+            </DialogTitle>
+            <DialogDescription className="text-sm text-zinc-500">
+              Formulaire de modification de la catégorie{" "}
+              <span className="font-medium text-zinc-900">{category.name}</span>.
+            </DialogDescription>
+          </DialogHeader>
+          {/* Form content goes here */}
+            <div className="p-6">
+             <CategoryEditForm category={category} setIsEditDialogOpen={setIsEditDialogOpen} />
+            </div>
+        </DialogContent>
+      </Dialog>
     </Card>
   );
 }

@@ -18,3 +18,8 @@ export const deleteCategory = async (id: number) => {
   const res = await axiosClient.delete(`/categories/${id}`);
   return res.data;
 }
+
+export const updateCategory = async (id: number, data: {name: string, nameAr: string}) => {
+  const res = await axiosClient.put(`/categories/${id}`, data);
+  return res.data;
+}

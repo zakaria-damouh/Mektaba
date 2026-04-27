@@ -15,6 +15,7 @@ import { AxiosError } from "axios";
 import { Search, X } from "lucide-react";
 import { useEffect, useRef, useState } from "react";
 import { TbCategoryPlus } from "react-icons/tb";
+import { toast } from "sonner";
 
 
 type APIError = {
@@ -42,12 +43,14 @@ function CategoriesPage() {
 
       onSuccess: () => {
         queryClient.invalidateQueries({ queryKey: ["categories"] });
+        toast.success("Catégorie supprimée avec succès");
         setDeleteError(null);
       },
 
       onError: (error : AxiosError<APIError>) => {
         console.error("Delete failed:", error);
         setDeleteError(error.response?.data?.message || "An error occurred");
+        toast.error(error.response?.data?.message || "Échec de la suppression de la catégorie");
       },
     });
 
