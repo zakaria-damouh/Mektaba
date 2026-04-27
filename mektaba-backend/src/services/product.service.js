@@ -182,3 +182,19 @@ export async function createProductService(data) {
     },
   });
 }
+
+
+export async function deleteProductService(id) { 
+
+  const existingProduct = await prisma.product.findUnique({
+    where: { id: Number(id) },
+  });
+
+  if (!existingProduct) {
+    throw new Error(`Product with id ${id} not found`);
+  }
+  
+  return prisma.product.delete({
+    where: { id: Number(id) },
+  });
+}

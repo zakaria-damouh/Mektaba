@@ -1,4 +1,4 @@
-import { createProductService, getAllProductsService, getProductByIdService } from "../services/product.service.js";
+import { createProductService, deleteProductService, getAllProductsService, getProductByIdService } from "../services/product.service.js";
 
 export async function GetAllProducts(req, res) {
   try {
@@ -31,6 +31,18 @@ export async function CreateProduct(req, res) {
   } catch (error) {
     if (error.message.includes("already exists")) {
       return res.status(409).json({ success: false, message: error.message });
+    }
+    res.status(500).json({ success: false, message: error.message });
+  }
+}
+
+export async function DeleteProduct(req, res) {
+  try {
+    const product = await deleteProductService(req.params.id);
+    res.json({ success: true, data: product });
+  } catch (error) {
+    if (error.message === "Product not found") {
+      return res.status(404).json({ success: false, message: error.message });
     }
     res.status(500).json({ success: false, message: error.message });
   }
