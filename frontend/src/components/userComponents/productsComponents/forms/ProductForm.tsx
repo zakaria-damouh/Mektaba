@@ -17,6 +17,9 @@ import { postProduct, updateProduct } from "@/services/product.service";
 import { ROUTES } from "@/lib/routes";
 import { Category } from "@/types/categoriesType";
 
+import { BsCheck } from "react-icons/bs";
+import { MdErrorOutline } from "react-icons/md";
+
 type ProductFormValues = z.input<typeof productSchema>;
 
 type ApiError = {
@@ -199,6 +202,64 @@ export default function ProductForm({
           className="h-11 rounded-xl border-zinc-200"
         />
       </div>
+
+      {/* CATEGORIES */}
+  <div className="space-y-3">
+  <Label className="text-sm font-medium text-zinc-800">Catégories</Label>
+  <div className="grid grid-cols-2 md:grid-cols-3 gap-3">
+    {categories.map((category) => {
+      const id = String(category.id);
+      const isChecked = selectedCategories.includes(id);
+      return (
+        <label
+          key={category.id}
+          className={`relative flex items-center gap-3 px-4 py-3 rounded-2xl border-2 cursor-pointer transition-all duration-200 select-none
+            ${isChecked
+              ? "border-zinc-900 bg-white shadow-sm"
+              : "border-zinc-200 bg-white hover:border-zinc-400 hover:shadow-sm"
+            }`}
+        >
+          {/* Hidden native checkbox */}
+          <input
+            type="checkbox"
+            className="sr-only"
+            checked={isChecked}
+            onChange={() => {
+              const updated = isChecked
+                ? selectedCategories.filter((c) => c !== id)
+                : [...selectedCategories, id];
+              setValue("categoryIds", updated, { shouldValidate: true });
+            }}
+          />
+
+          {/* Custom checkbox circle */}
+          <span
+            className={`flex-shrink-0 w-5 h-5 rounded-full border-2 flex items-center justify-center transition-all duration-200
+              ${isChecked
+                ? "border-zinc-900 bg-zinc-900"
+                : "border-zinc-300 bg-white"
+              }`}
+          >
+            {isChecked && <BsCheck className="w-3 h-3 text-white" strokeWidth={1} />}
+          </span>
+
+          <span className={`text-sm font-medium truncate transition-colors duration-200
+            ${isChecked ? "text-zinc-900" : "text-zinc-500"}`}
+          >
+            {category.name}
+          </span>
+        </label>
+      );
+    })}
+  </div>
+
+  {errors.categoryIds && (
+    <p className="text-xs text-rose-500 flex items-center gap-1 mt-1">
+      <MdErrorOutline size={16} />
+      {errors.categoryIds.message}
+    </p>
+  )}
+</div>
     {/* SUBMIT */}
     <Button
       className="w-full h-11 rounded-xl text-sm font-medium shadow-sm hover:shadow-md transition-all cursor-pointer"

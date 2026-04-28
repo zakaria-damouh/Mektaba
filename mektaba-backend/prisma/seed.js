@@ -1,13 +1,12 @@
+import { PrismaMariaDb } from "@prisma/adapter-mariadb";
+import { PrismaClient } from "@prisma/client";
 import "dotenv/config";
-import pkg from "@prisma/client";
-const { PrismaClient } = pkg;
-import { PrismaPg } from "@prisma/adapter-pg";
- 
-const adapter = new PrismaPg({
-  connectionString: process.env.DATABASE_URL,
-});
- 
+
+const adapter = new PrismaMariaDb(process.env.DATABASE_URL);
 const prisma = new PrismaClient({ adapter });
+ 
+
+ 
  
 const categories = [
   { name: "Papeterie",               nameAr: "قرطاسية" },
@@ -154,22 +153,21 @@ const products = [
  
 async function main() {
   console.log("🌱 Seeding database...");
- 
-  // Clear existing data (junction table first)
+
   await prisma.productCategory.deleteMany();
   await prisma.product.deleteMany();
   await prisma.category.deleteMany();
- 
+
   console.log("🗑️  Cleared existing data");
- 
-  // Seed categories
+
+  // ✅ Fixed: create one by one and store the result
   const createdCategories = {};
   for (const cat of categories) {
     const created = await prisma.category.create({ data: cat });
     createdCategories[cat.name] = created;
     console.log(`  ✅ Category: ${cat.name}`);
   }
- 
+
   // Seed products + junction
   for (const { category, ...productData } of products) {
     const product = await prisma.product.create({ data: productData });
@@ -181,10 +179,10 @@ async function main() {
     });
     console.log(`  📦 Product: ${product.ref} — ${product.name}`);
   }
- 
+
   console.log(`\n✅ Done! Seeded ${categories.length} categories and ${products.length} products.`);
 }
- 
+
 main()
   .catch((e) => {
     console.error("❌ Seed failed:", e);
