@@ -4,6 +4,7 @@ import { SidebarProvider } from "@/components/ui/sidebar";
 import { AppSidebar } from "@/components/userComponents/layouts/app-sidebar";
 import { UserHeader } from "@/components/userComponents/layouts/UserHeader";
 import { useState } from "react";
+import { Toaster } from "sonner";
 
 
 function UserLayout({ children }: { children: React.ReactNode }) {
@@ -21,6 +22,7 @@ function UserLayout({ children }: { children: React.ReactNode }) {
                 <main>
                     {children}
                 </main>
+                <Toaster richColors />
             </div>
         </div>
 

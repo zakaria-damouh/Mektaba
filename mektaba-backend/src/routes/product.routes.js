@@ -1,0 +1,14 @@
+import { Router } from "express";
+import { CreateProduct, DeleteProduct, GetAllProducts, GetProductById, UpdateProduct } from "../controllers/product.controller.js";
+import { createProductValidator, updateProductValidator } from "../validator/product.validator.js";
+import { validate } from "../middlewares/validate.middleware.js";
+
+const router = Router();
+
+router.get("/", GetAllProducts);
+router.get("/:id", GetProductById);
+router.post("/", createProductValidator , validate , CreateProduct);
+router.delete("/:id", DeleteProduct);
+router.put("/:id", updateProductValidator, validate, UpdateProduct);
+
+export default router;
