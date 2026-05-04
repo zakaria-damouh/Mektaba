@@ -8,7 +8,7 @@ import { Product } from "@/types/productsType";
 
 function ProductResults({ products, view , isLoading} : { products: Product[]; view: "grid" | "list"; isLoading: boolean }) {
 
-   if (!isLoading && products.length === 0) {
+   if (!isLoading && products?.length === 0) {
     return <EmptyProducts />;
   }
 
@@ -18,7 +18,7 @@ function ProductResults({ products, view , isLoading} : { products: Product[]; v
       Array.from({ length: 8 }).map((_, i) => <ProductCardSkeleton key={i} />)
     ) : (
       <>
-        {products.map((item: Product) => (
+        {products?.map((item: Product) => (
             <ProductCard key={item.id} product={item} />
         ))}
       </>
