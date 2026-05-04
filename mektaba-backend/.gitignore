@@ -59,3 +59,9 @@ Thumbs.db
 # prisma 
 prisma/migrations/
 /generated/prisma
+
+/src/generated/prisma
+
+/src/generated/prisma
+
+/src/generated/prisma

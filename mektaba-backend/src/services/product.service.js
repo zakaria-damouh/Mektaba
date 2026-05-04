@@ -1,4 +1,3 @@
-import prisma from "../lib/prisma.js";
 
 export async function getAllProductsService(params = {}) {
   const {
@@ -51,8 +50,8 @@ export async function getAllProductsService(params = {}) {
   // search filter
   if (safeSearch) {
     where.OR = [
-      { name: { contains: safeSearch, mode: "insensitive" } },
-      { ref: { contains: safeSearch, mode: "insensitive" } },
+      { name: { contains: safeSearch } },
+      { ref: { contains: safeSearch } },
     ];
   }
 
